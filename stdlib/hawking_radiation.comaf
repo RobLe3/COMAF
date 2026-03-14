@@ -1,0 +1,32 @@
+# COMAF-Lite Standard Library: Hawking Radiation
+# Slow decay of black hole through quantum tunneling across horizon.
+
+ENTITY: EvaporatingBlackHole
+CYCLE: CPL-7
+FRAME: t ∈ [0.95, 1.0 WarpTick]
+UNITS: Planck
+
+STATE ψ:
+  evolve Schrödinger {
+    init: |bh⟩
+    hamiltonian: H = H_bh + Tunneling
+  }
+
+ENTROPY S:
+  evolve Boltzmann {
+    init: 1e120
+    max: 1e123
+    scale: 1e9 Plaseconds
+  }
+
+GEOMETRY:
+  field_equation: G = (8πG/c⁴) · <T>
+
+IF event_horizon > lambda_p:
+  emit {
+    energy: ΔE = ħc³ / (8πGM)
+    decay: ψ = ψ - |bh⟩ + |γ⟩
+  }
+
+ON cycle.end:
+  S = S / (1 + α)

@@ -1,0 +1,30 @@
+# COMAF-Lite Standard Library: Heat Death and Conformal Reboot
+# Universe reaches thermodynamic maximum entropy. Geometry flattens. Time resets.
+
+ENTITY: DeadUniverse
+CYCLE: CPL-∞
+FRAME: t ∈ [0.99, 1.0 WarpTick]
+UNITS: Planck
+
+ENTROPY S:
+  evolve Boltzmann {
+    init: 1e123
+    max: 1e123
+    scale: 1 Plasecond
+  }
+
+STATE ψ:
+  evolve Schrödinger {
+    init: |null⟩
+    hamiltonian: 0
+  }
+
+GEOMETRY:
+  field_equation: G = 0
+
+STABILITY:
+  metric D(t) = 0
+
+ON cycle.end:
+  ψ ·= e^(iπ)
+  S = S / (1 + α)

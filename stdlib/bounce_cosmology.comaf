@@ -1,0 +1,30 @@
+# COMAF-Lite Standard Library: Bounce Cosmology
+# Universe contracts to maximum entropy, rebounds into expansion (CCC-style).
+
+ENTITY: BouncingUniverse
+CYCLE: CPL-n
+FRAME: t ∈ [0, 1 WarpTick]
+UNITS: Planck
+
+ENTROPY S:
+  evolve Boltzmann {
+    init: 1e120
+    max: 1e121
+    scale: 1e9 Plaseconds
+  }
+
+STATE ψ:
+  evolve Schrödinger {
+    init: superposition[|contracting⟩, |expanding⟩]
+    hamiltonian: H = H_gravity + H_quantum
+  }
+
+GEOMETRY:
+  field_equation: G + Λg = (8πG/c⁴) · <T_total>
+
+STABILITY:
+  metric D(t) = exp(-|∇S(t)| · t)
+
+ON cycle.end:
+  S = S / (1 + α)
+  ψ ·= e^(iπ)

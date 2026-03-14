@@ -1,0 +1,36 @@
+# COMAF-Lite Standard Library: Black Hole Formation
+# Collapse of massive star into singularity, spacetime distortion, entropy gain.
+
+ENTITY: StellarCollapse
+CYCLE: CPL-3
+FRAME: t ∈ [0.6, 0.9 WarpTick]
+UNITS: Planck
+
+ENTROPY S:
+  evolve Boltzmann {
+    init: 1e88
+    max: 1e120
+    scale: 1e5 Plaseconds
+  }
+
+STATE ψ:
+  evolve Schrödinger {
+    init: superposition[|mass⟩, |collapse⟩]
+    hamiltonian: H = KE + PE + curvature
+  }
+
+GEOMETRY:
+  field_equation: G = (8πG/c⁴) · <T_mass>
+
+STABILITY:
+  metric D(t) = exp(-|∇S(t)| · t)
+
+IF curvature R > R_max:
+  collapse {
+    energy: E_jump
+    resolution: lambda_p
+    decoherence: D(t)
+  }
+
+ON cycle.end:
+  S = S / (1 + α)

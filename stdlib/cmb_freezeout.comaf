@@ -1,0 +1,32 @@
+# COMAF-Lite Standard Library: CMB Freeze-Out
+# Quantum fluctuations become classical structure at ~380,000 years post-Big Bang.
+
+ENTITY: ObservableUniverse
+CYCLE: CPL-1
+FRAME: t ∈ [0.0001, 0.01 WarpTick]
+UNITS: Planck
+
+STATE ψ:
+  evolve Schrödinger {
+    init: superposition[|fluct1⟩, |fluct2⟩, |fluct3⟩]
+    hamiltonian: H = H_0 + inflation decay
+  }
+
+ENTROPY S:
+  evolve Boltzmann {
+    init: 1e88
+    max: 1e108
+    scale: 1e6 Plaseconds
+  }
+
+GEOMETRY:
+  field_equation: G + Λg = (8πG/c⁴) · <T_fluct>
+
+STABILITY:
+  metric D(t) = exp(-|∇S(t)| · t)
+
+IF D(t) < 0.01:
+  collapse {
+    energy: E_jump
+    resolution: lambda_p
+  }

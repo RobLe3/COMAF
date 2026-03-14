@@ -1,0 +1,30 @@
+# COMAF-Lite Standard Library: Early Universe Inflation
+# Rapid exponential expansion driven by vacuum energy.
+
+ENTITY: EarlyUniverse
+CYCLE: CPL-1
+FRAME: t ∈ [0, 0.001 WarpTick]
+UNITS: Planck
+
+ENTROPY S:
+  evolve Boltzmann {
+    init: 1e3
+    max: 1e88
+    scale: 1e3 Plaseconds
+  }
+
+STATE φ:
+  evolve Schrödinger {
+    init: |vac⟩
+    hamiltonian: V(φ) = ½ m²φ² + λφ⁴
+  }
+
+GEOMETRY:
+  field_equation: G + Λg = (8πG/c⁴) · <T_φ>
+
+IF ∇φ = 0 AND ρ_vac > threshold:
+  warp {
+    velocity: v_warp = c · e^(κ · Λ)
+    safety: D(t) > 0.95
+    target: CPL-1::t + Δexpansion
+  }
