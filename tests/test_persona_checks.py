@@ -323,20 +323,24 @@ class TestP31PhysicalVerification:
         )
 
     def test_dho_model_b_q_larger_damping(self):
-        """P31-Q3: DHO Model B must have larger damping (gamma_B > gamma_A)."""
-        gamma_a = 0.1  # from Model A
-        gamma_b = 0.8  # from Model B
+        """P31-Q3: DHO Model B must have larger damping (gamma_B > gamma_A).
+        Canonical values: gamma_A = 0.05 s^-1 (Q_A=10, tau_A=20 s),
+                          gamma_B = 0.8 s^-1  (Q_B_eff=0.625, tau_B=1.25 s).
+        Ring-down ratio: tau_A / tau_B = 20 / 1.25 = 16.
+        """
+        gamma_a = 0.05  # canonical Model A: gamma_A = 0.05 s^-1 (§5b, TC5)
+        gamma_b = 0.8   # canonical Model B: gamma_B = 0.8 s^-1
         assert gamma_b > gamma_a, (
             f"Model B damping gamma_B={gamma_b} must exceed Model A gamma_A={gamma_a}"
         )
         # Ring-down times: tau = 1/gamma
-        tau_a = 1.0 / gamma_a   # 10 s
+        tau_a = 1.0 / gamma_a   # 20 s (canonical)
         tau_b = 1.0 / gamma_b   # 1.25 s
         assert tau_a > tau_b, "Model A must ring down slower than Model B"
-        ratio = tau_a / tau_b
-        assert ratio > 4.0, (
-            f"Ring-down time ratio tau_A/tau_B = {ratio:.1f} should be >4× "
-            f"for clear experimental distinguishability"
+        ratio = tau_a / tau_b   # canonical: 16
+        assert abs(ratio - 16.0) / 16.0 < 0.10, (
+            f"Ring-down time ratio tau_A/tau_B = {ratio:.1f} must equal 16× ±10% "
+            f"(canonical: tau_A=20 s, tau_B=1.25 s)"
         )
 
     def test_dho_entropy_to_damping_dimensional_consistency(self):
