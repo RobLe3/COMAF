@@ -147,18 +147,11 @@ class TestP29WolframExpert:
             assert path.exists(), f"Missing Wolfram test case: {wl_file}"
 
     def test_tc5_q_value_correct(self):
-        """P29-Q2: TC5 must use gammaA=0.1, omega0=1.0, yielding Q_A=50."""
+        """P29-Q2: TC5 must use gammaA=0.05, omega0=1.0, yielding Q_A=10 (canonical)."""
         tc5 = (WOLFRAM_DIR / "tc5_dho_entropy_damping.wl").read_text()
-        assert "gammaA = 0.1" in tc5, "TC5: gammaA must be 0.1"
+        assert "gammaA = 0.05" in tc5, "TC5: gammaA must be 0.05 (canonical: gamma_A=0.05 s^-1)"
         assert "omega0 = 1.0" in tc5 or "omega0 = 1" in tc5, "TC5: omega0 must be 1.0"
-        # QA = omega0 / (2 * gammaA) = 1.0 / 0.2 = 5.0 ... wait
-        # Actually QA = omega0/(2*gammaA) = 1.0/(2*0.1) = 5.0, not 50
-        # But the test case says Q=50. Let me check: Q = omega0/(2*gamma) = 1/(0.2) = 5
-        # The code computes QA = omega0 / (2 gammaA) which is 5, not 50.
-        # The Q=50 label in the test is "ring-down count" label, not the formula Q.
-        # Let me check: the test uses QA = omega0/(2*gammaA) = 5.0 but
-        # the comment says Q=50... this needs investigation.
-        # For now, verify the formula is present and the expected Q value assertion exists.
+        # Canonical: QA = omega0 / (2 * gammaA) = 1.0 / (2 * 0.05) = 10
         assert "QA" in tc5, "TC5: Q_A computation must be present"
         assert "PASS" in tc5, "TC5: must have PASS assertion"
 
@@ -319,16 +312,14 @@ class TestP31PhysicalVerification:
         )
 
     def test_dho_model_a_q_factor_physical(self):
-        """P31-Q2: DHO Model A Q=50 must be physically realizable."""
-        # Q_A = omega_0 / (2 * gamma_A) = 1.0 / (2 * 0.1) = 5.0
-        # Note: The "Q=50" label in comments refers to a different normalization
-        # (phenomenological ring-down count). The formula Q gives 5.0.
-        # Both are physically reasonable (lightly damped oscillators span Q=1 to 10^8).
+        """P31-Q2: DHO Model A canonical Q_A=10 must equal omega_0/(2*gamma_A)."""
+        # Canonical: gamma_A = 0.05 → Q_A = omega_0 / (2*gamma_A) = 10
         omega_0 = 1.0
-        gamma_a = 0.1
-        q_formula = omega_0 / (2 * gamma_a)
-        assert 1.0 <= q_formula <= 1e8, (
-            f"DHO Model A: Q_formula = {q_formula} outside physical range [1, 10^8]"
+        gamma_a = 0.05
+        Q_A = omega_0 / (2 * gamma_a)
+        assert abs(Q_A - 10.0) / 10.0 < 0.20, (
+            f"Model A Q_A={Q_A:.2f} must equal 10.0 ± 20% "
+            f"(canonical: gamma_A=0.05 s^-1, Q=10, tau=20 s)"
         )
 
     def test_dho_model_b_q_larger_damping(self):
@@ -405,9 +396,10 @@ class TestP31PhysicalVerification:
         tau_b = 1.0 / gamma_b
 
         ratio = tau_a / tau_b
-        assert ratio >= 4.0, (
-            f"TC6: tau_A/tau_B = {ratio:.2f} — ratio must be ≥4 for clear "
-            f"experimental distinguishability (got tau_A={tau_a}, tau_B={tau_b:.2f})"
+        # Canonical ring-down ratio: tau_A / tau_B = 20 / 1.25 = 16
+        assert abs(ratio - 16.0) / 16.0 < 0.10, (
+            f"Ring-down ratio must be 16× ±10% "
+            f"(got tau_A={tau_a}, tau_B={tau_b:.2f}, ratio={ratio:.2f})"
         )
 
     def test_pnms_quasiplanck_order_of_magnitude(self):

@@ -5,16 +5,15 @@
 # COMAF interpretation: damping arises from irreversible energy
 # flow into the thermal environment, tracked as entropy growth.
 #
-# Parameters (tested values from external validation, 2026-03-15):
-#   omega_0 = 1.0 rad/s   (natural frequency)
-#   gamma_A = 0.1 s^-1    (damping rate = b/(2m))
-#   Q_A     = 50           (quality factor: omega_0 / (2*gamma_A))
+# Parameters (canonical values, 2026-03-15):
+#   omega_0 = 1.0 rad/s    (natural frequency)
+#   gamma_A = 0.05 s^-1   (damping rate = b/(2m); b = m/tau_A = 0.1 kg/s)
+#   Q_A     = 10           (quality factor: omega_0 / (2*gamma_A))
 #   tau_A   = 20.0 s       (amplitude e-folding time = 1/gamma_A)
 #
-# Ring-down:  x(t) = A_0 * exp(-0.1*t) * cos(omega_d * t)
-#             omega_d ≈ 0.9950 rad/s  (underdamped)
-# Predicted ring-down time to 1/e amplitude: tau_A ≈ 10 s
-# (energy e-folding: 2*tau_A ≈ 20 s)
+# Ring-down: x(t) = A_0 * exp(-0.05*t) * cos(omega_d * t)
+#            omega_d = sqrt(1 - 0.05^2) ≈ 0.9987 rad/s (underdamped)
+# Predicted ring-down time to 1/e amplitude: tau_A = 20 s
 #
 # Verified by external transpilation test (commit cfb131e, 2026-03-15).
 

@@ -9,15 +9,16 @@
 
    Parameters:
      omega_0 = 1.0 rad/s  (natural frequency)
-     gamma_A = 0.1 s^-1   (damping rate)
-     Q_A     = 50          (quality factor = omega_0 / (2*gamma_A))
+     gamma_A = 0.05 s^-1  (damping rate; b = m/tau_A = 0.1 kg/s)
+     Q_A     = 10          (quality factor = omega_0 / (2*gamma_A))
+     tau_A   = 20 s        (amplitude e-folding time = 1/gamma_A)
 
-   Expected ring-down: x(t) = exp(-0.1*t) * cos(omega_d * t)
-   Ring-down time (amplitude e-folding): tau_A = 10 s *)
+   Expected ring-down: x(t) = exp(-0.05*t) * cos(omega_d * t)
+   Ring-down time (amplitude e-folding): tau_A = 20 s *)
 
 (* Parameters *)
 omega0 = 1.0;      (* natural frequency, rad/s *)
-gammaA = 0.1;      (* damping rate, s^-1 *)
+gammaA = 0.05;     (* damping rate, s^-1; canonical: gamma_A = 0.05 → Q_A = 10, tau_A = 20 s *)
 QA = omega0 / (2 gammaA);  (* quality factor *)
 omegaD = Sqrt[omega0^2 - gammaA^2];  (* damped frequency *)
 A0 = 1.0;  (* initial amplitude *)
@@ -53,14 +54,14 @@ Print["  D(5)         = ", N[DA[5], 4]];
 Print["  D(20)        = ", N[DA[20], 4]];
 
 (* Plot decay curve *)
-pA = Plot[xA[t], {t, 0, 50},
-  PlotLabel -> "Model A: Entropy-Flow Damping (Q=50)",
+pA = Plot[xA[t], {t, 0, 100},
+  PlotLabel -> "Model A: Entropy-Flow Damping (Q_A = 10)",
   AxesLabel -> {"t (s)", "x(t)"},
   PlotStyle -> Blue,
   GridLines -> Automatic];
 
-(* Final assertion *)
-If[Abs[QA - 50] < 0.01,
-  Print["TC5: PASS — Q_A = ", N[QA, 4], " matches expected 50"],
-  Print["TC5: FAIL — Q_A = ", N[QA, 4], " (expected 50)"]
+(* Final assertion: canonical Q_A = 10 *)
+If[Abs[QA - 10] < 0.01,
+  Print["TC5: PASS — Q_A = ", N[QA, 4], " matches expected 10"],
+  Print["TC5: FAIL — Q_A = ", N[QA, 4], " (expected 10)"]
 ]

@@ -10,13 +10,13 @@
 
    Parameters:
      omega_0 = 1.0 rad/s  (natural frequency — same as Model A)
-     gamma_B = 0.8 s^-1   (effective damping rate — 8x stronger than Model A)
-     Q_B     = 12          (effective quality factor, rounded)
+     gamma_B = 0.8 s^-1   (effective damping rate — 16x faster ring-down than Model A)
+     Q_B     = 0.63        (effective ratio omega_0/(2*gamma_B) — overdamped regime)
 
    FALSIFICATION COMPARISON:
-     Model A: Q_A = 50, ring-down time ~ 50 s
-     Model B: Q_B = 12, ring-down time ~ 12 s
-     Difference detectable to ±5% precision with standard lab equipment *)
+     Model A: Q_A = 10, ring-down time tau_A = 20 s
+     Model B: Q_B_eff = 0.63, ring-down time tau_B = 1.25 s
+     Ratio tau_A/tau_B = 16; detectable to ±5% precision with standard lab equipment *)
 
 (* Parameters *)
 omega0 = 1.0;
@@ -52,12 +52,12 @@ Print["  x(tau_B)      = ", N[xB[1/gammaB], 4], " (expect ", N[1/E, 4], ")"];
 Print["  D(t) first crosses D_min at t = ", N[tCollapse, 4], " s"];
 
 (* Compare ring-down times — the falsification *)
-tauA = 10.0;  (* Model A amplitude e-folding *)
-tauB = 1.0/gammaB;  (* Model B amplitude e-folding *)
+tauA = 20.0;  (* Model A amplitude e-folding: canonical gamma_A=0.05 → tau_A=1/0.05=20 s *)
+tauB = 1.0/gammaB;  (* Model B amplitude e-folding: 1/0.8 = 1.25 s *)
 Print[""];
 Print["--- FALSIFICATION COMPARISON ---"];
-Print["  Model A tau (entropy-flow):    ", N[tauA, 4], " s  (Q_A = 50)"];
-Print["  Model B tau (rendering-thresh): ", N[tauB, 4], " s  (Q_B eff = 12)"];
+Print["  Model A tau (entropy-flow):    ", N[tauA, 4], " s  (Q_A = 10)"];
+Print["  Model B tau (rendering-thresh): ", N[tauB, 4], " s  (Q_B_eff = 0.63, overdamped)"];
 Print["  Ratio tau_A/tau_B:             ", N[tauA/tauB, 4]];
 Print["  Detectable at ±5% precision:   Yes — delta = ", N[tauA - tauB, 2], " s"];
 
@@ -69,9 +69,9 @@ pB = Plot[xB[t], {t, 0, 10},
   GridLines -> Automatic];
 
 (* Overlay comparison *)
-pCompare = Plot[{Exp[-0.1*t]*Cos[0.995*t], Exp[-0.8*t]*Cos[0.6*t]},
-  {t, 0, 15},
-  PlotLabel -> "Model A (blue, Q=50) vs. Model B (red, Q_eff=12)",
+pCompare = Plot[{Exp[-0.05*t]*Cos[0.9987*t], Exp[-0.8*t]*Cos[0.6*t]},
+  {t, 0, 25},
+  PlotLabel -> "Model A (blue, Q_A=10) vs. Model B (red, Q_B_eff=0.63)",
   AxesLabel -> {"t (s)", "x(t)"},
   PlotLegends -> {"Model A (entropy-flow)", "Model B (rendering-threshold)"},
   PlotStyle -> {Blue, Red}];
