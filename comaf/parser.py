@@ -256,6 +256,7 @@ class Parser:
     def parse_stability_block(self) -> StabilityBlockNode:
         self.expect_keyword("STABILITY")
         self.expect(TT_COLON)
+        self.skip_newlines()
         self.expect_keyword("metric")
         metric_name = self.advance().value
         self.consume_if(TT_OP, "=")
@@ -271,6 +272,7 @@ class Parser:
             condition_parts.append(self.advance().value)
         condition = " ".join(condition_parts)
         self.expect(TT_COLON)
+        self.skip_newlines()
 
         # Determine block type
         action_tok = self.peek()
