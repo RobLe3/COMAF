@@ -178,6 +178,10 @@ Models are stored in `.comaf` files and processed by the interpreter pipeline:
 .comaf source → Lexer → Parser → AST → Validator → Transpiler → .wl / .py
 ```
 
+**Formal language specifications:**
+- [`docs/comaf_lite.ebnf`](docs/comaf_lite.ebnf) — Complete EBNF grammar (ISO 14977, Appendix C of paper)
+- [`docs/comaf_lite_schema.json`](docs/comaf_lite_schema.json) — JSON Schema Draft 2020-12 for AST serialization (Appendix D of paper)
+
 ---
 
 ## PNMS Units
@@ -200,7 +204,7 @@ COMAF-Lite uses the **Planck-Native Metric System (PNMS)** — a unit system bui
 | Plameter | 10^35 λ_p | ≈ 1 m |
 | Plasecond | 10^44 t_p | ≈ 1 s |
 | WarpTick | 10^61 t_p | ≈ 17.1 Gyr (one conformal Planck loop) |
-| Quasiplanck | 10^61 λ_p | ≈ 8.8 × 10^26 m (observable universe radius) |
+| Quasiplanck | 10^61 λ_p | ≈ 1.616 × 10^26 m (observable universe radius) |
 
 Additional derived units: `Plakilograms`, `Plajoules`, `RicciBits` (Planck curvature), `EntropyTicks` (= k_B).
 
@@ -294,11 +298,27 @@ comaf-interpreter/
 │       ├── tc3_entropy_curvature_oscillation.wl  # VFR-303
 │       └── tc4_black_hole_collapse.wl     # VFR-304
 ├── docs/
-│   └── QULT-C_v1.3.0-review.pdf  # Current version (75 pages)
+│   ├── QULT-C_v1.3.0-review.pdf  # Current version (75 pages)
+│   ├── comaf_lite.ebnf            # EBNF grammar (Appendix C)
+│   └── comaf_lite_schema.json     # JSON Schema Draft 2020-12 (Appendix D)
 ├── pyproject.toml
 ├── LICENSE
 └── README.md
 ```
+
+---
+
+## Bridge-Finder Vision
+
+COMAF is intended to become a **bridge-finder for physics** — a bidirectional, falsifiable translation layer between formal ontological specifications and executable physical models.
+
+The current COMAF-Lite implementation (this repository) is the first step: a stack-aware transpiler that converts `.comaf` models into Wolfram Language and Python code. Future versions aim to:
+
+1. **Verify** — check whether a `.comaf` model is consistent with COSI Stack constraints (not just syntactically valid)
+2. **Infer** — given a Wolfram or Python simulation, identify the COMAF-Lite block structure it corresponds to (reverse transpilation)
+3. **Falsify** — expose COMAF-Lite models as machine-readable falsifiability targets, with concrete observational surrogates for each model parameter
+
+The `bridge-finder` framing distinguishes COMAF from ordinary DSLs: the goal is bidirectionality between physics theory and executable specification, not one-way code generation.
 
 ---
 

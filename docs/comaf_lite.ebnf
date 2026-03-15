@@ -1,0 +1,208 @@
+(* COMAF-Lite EBNF Grammar v0.1 — ISO 14977 Notation
+   Extracted from QULT-C paper Appendix C (v1.3.0-review)
+   See: docs/QULT-C_v1.3.0-review.pdf, Appendix C *)
+
+(* ─────────────────────────────────────────────────────────────
+   Program Structure
+   ───────────────────────────────────────────────────────────── *)
+
+PROGRAM           ::= MODEL_DEF? HEADER BLOCKS
+
+MODEL_DEF         ::= ('MODEL' | 'UNIVERSE') IDENT ('{' | ':')
+
+HEADER            ::= 'ENTITY:' IDENT
+                      'CYCLE:' IDENT
+                      'FRAME:' RANGE
+                      'UNITS:' UNIT_SYSTEM
+
+RANGE             ::= IDENT 'in' '[' EXPR ',' EXPR ']'
+                    | IDENT 'in' '[' EXPR ',' EXPR UNIT_SUFFIX ']'
+
+UNIT_SYSTEM       ::= 'Planck' | 'SI' | 'PNMS'
+
+BLOCKS            ::= BLOCK+
+
+BLOCK             ::= STATE_BLOCK
+                    | ENTROPY_BLOCK
+                    | GEOMETRY_BLOCK
+                    | STABILITY_BLOCK
+                    | COLLAPSE_BLOCK
+                    | WARP_BLOCK
+                    | EMIT_BLOCK
+                    | TRANSITION_BLOCK
+                    | EVENT_BLOCK
+                    | COMMENT
+
+(* ─────────────────────────────────────────────────────────────
+   Block Definitions
+   ───────────────────────────────────────────────────────────── *)
+
+(* Layer 2: Wavefunction Evolution *)
+STATE_BLOCK       ::= 'STATE' IDENT ':'
+                      'evolve' 'Schrodinger' '{'
+                        STATE_BODY
+                      '}'
+
+STATE_BODY        ::= 'init:' STATE_INIT
+                      'hamiltonian:' HAMILTONIAN_EXPR
+
+STATE_INIT        ::= 'superposition' '[' STATE_LIST ']'
+                    | SCALAR
+                    | QUANTUM_STATE
+
+STATE_LIST        ::= STATE_REF (',' STATE_REF)*
+
+STATE_REF         ::= '|' IDENT '>'
+
+HAMILTONIAN_EXPR  ::= IDENT '(' PARAM_LIST ')'
+                    | MATH_EXPR
+
+(* Layer 3: Entropy Flow *)
+ENTROPY_BLOCK     ::= 'ENTROPY' IDENT ':'
+                      'evolve' 'Boltzmann' '{'
+                        ENTROPY_BODY
+                      '}'
+
+ENTROPY_BODY      ::= 'init:' SCALAR
+                      'max:' SCALAR
+                      'scale:' TIME_VALUE
+
+TIME_VALUE        ::= SCALAR UNIT_SUFFIX?
+
+(* Layer 4: Geometry Protocol *)
+GEOMETRY_BLOCK    ::= 'GEOMETRY:'
+                      'field_equation:' FIELD_EQUATION
+
+FIELD_EQUATION    ::= 'G + Lambda*g = (8*pi*G/c^4) * <T>'
+                    | CUSTOM_EXPR
+
+(* Layer 6: Causal Routing — Stability *)
+STABILITY_BLOCK   ::= 'STABILITY:'
+                      'metric' IDENT '(' IDENT ')' '=' FUNCTION_EXPR
+
+FUNCTION_EXPR     ::= FUNCTION_CALL
+                    | MATH_EXPR
+
+(* Layer 5: Rendering Control — Collapse Trigger *)
+COLLAPSE_BLOCK    ::= 'IF' CONDITION ':' NEWLINE
+                      INDENT 'collapse' '{'
+                        COLLAPSE_BODY
+                      '}'
+
+COLLAPSE_BODY     ::= ('energy:'      VALUE NEWLINE)?
+                      ('resolution:'  VALUE NEWLINE)?
+                      ('decoherence:' IDENT NEWLINE)?
+
+(* Layer 6: Causal Routing — Warp Trigger *)
+WARP_BLOCK        ::= 'IF' CONDITION ':' NEWLINE
+                      INDENT 'warp' '{'
+                        WARP_BODY
+                      '}'
+
+WARP_BODY         ::= ('velocity:'  VALUE NEWLINE)?
+                      ('safety:'    CONDITION NEWLINE)?
+                      ('target:'    LOCATION NEWLINE)?
+
+(* Layer 5: Emit — Hawking Radiation *)
+EMIT_BLOCK        ::= 'IF' CONDITION ':' NEWLINE
+                      INDENT 'emit' '{'
+                        EMIT_BODY
+                      '}'
+
+EMIT_BODY         ::= ('energy:'  VALUE NEWLINE)?
+                      ('decay:'   STATE_EXPR NEWLINE)?
+                      ('event:'   IDENT NEWLINE)?
+
+(* Layer 7: Cyclic Transition *)
+TRANSITION_BLOCK  ::= 'ON' EVENT_NAME ':' NEWLINE
+                      INDENT STATEMENT+
+
+EVENT_NAME        ::= IDENT ('.' IDENT)?
+
+STATEMENT         ::= ASSIGNMENT NEWLINE
+                    | STATE_EXPR NEWLINE
+
+ASSIGNMENT        ::= IDENT '=' EXPR
+
+EVENT_BLOCK       ::= 'EVENT' IDENT ':' EVENT_BODY
+
+EVENT_BODY        ::= STATEMENT+
+
+COMMENT           ::= '#' .* NEWLINE
+
+(* ─────────────────────────────────────────────────────────────
+   Conditions, Expressions, and Tokens
+   ───────────────────────────────────────────────────────────── *)
+
+EXPR              ::= MATH_EXPR
+                    | FUNCTION_CALL
+                    | IDENT
+                    | SCALAR
+
+STATE_EXPR        ::= IDENT '|' NUMBER '>'  (* quantum state literal *)
+
+CUSTOM_EXPR       ::= MATH_EXPR
+
+CONDITION         ::= EXPR COMP_OP EXPR
+                    | CONDITION 'AND' CONDITION
+                    | CONDITION 'OR' CONDITION
+                    | '(' CONDITION ')'
+
+COMP_OP           ::= '>' | '<' | '>=' | '<=' | '==' | '!='
+
+MATH_EXPR         ::= TERM (('+' | '-') TERM)*
+
+TERM              ::= FACTOR (('*' | '/') FACTOR)*
+
+FACTOR            ::= UNARY_OP? BASE
+
+BASE              ::= NUMBER
+                    | IDENT
+                    | FUNCTION_CALL
+                    | '(' MATH_EXPR ')'
+
+UNARY_OP          ::= '-' | '+'
+
+FUNCTION_CALL     ::= IDENT '(' ARG_LIST? ')'
+
+ARG_LIST          ::= EXPR (',' EXPR)*
+
+PARAM_LIST        ::= IDENT (',' IDENT)*
+
+LOCATION          ::= 'sector' '::' IDENT '::' IDENT '->' IDENT '::' IDENT
+
+UNIT_SUFFIX       ::= 'Plaseconds' | 'Plameters' | 'WarpTick'
+                    | 'Plasecond'  | 'Plameter'
+                    | 'lambda_p'   | 't_p'       | 'm_p'
+                    | 'E_p'        | 'k_B'
+
+VALUE             ::= SCALAR | IDENT | FUNCTION_CALL
+
+SCALAR            ::= NUMBER (UNIT_SUFFIX)?
+
+QUANTUM_STATE     ::= '|' IDENT '>'
+
+NUMBER            ::= DIGIT+ ('.' DIGIT+)? (('e' | 'E') ('+' | '-')? DIGIT+)?
+
+IDENT             ::= LETTER (LETTER | DIGIT | '_' | '-')*
+                    (* Hyphens allowed: cycle IDs e.g. CPL-8 *)
+
+LETTER            ::= 'a'..'z' | 'A'..'Z'
+
+DIGIT             ::= '0'..'9'
+
+NEWLINE           ::= '\n' | '\r\n'
+
+INDENT            ::= '  ' | '\t'     (* 2 spaces or one tab *)
+
+(* ─────────────────────────────────────────────────────────────
+   Reserved Keywords
+   ───────────────────────────────────────────────────────────── *)
+
+(* MODEL, UNIVERSE, ENTITY, CYCLE, FRAME, UNITS,
+   STATE, ENTROPY, GEOMETRY, STABILITY,
+   IF, ON, EVENT, collapse, warp,
+   emit, evolve, Schrodinger, Boltzmann,
+   superposition, field_equation, metric,
+   AND, OR, Planck, SI, PNMS,
+   cycle.end, warp.complete *)

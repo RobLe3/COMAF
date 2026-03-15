@@ -1,0 +1,228 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://comaf.io/schema/comaf-lite-0.1.json",
+  "title": "COMAF-Lite Model",
+  "description": "Schema for COMAF-Lite v0.1 physical models. Extracted from QULT-C paper Appendix D (v1.3.0-review). See docs/QULT-C_v1.3.0-review.pdf, Appendix D.",
+  "type": "object",
+  "required": ["entity", "cycle", "frame", "units", "blocks"],
+  "properties": {
+    "model": {
+      "type": "string",
+      "description": "Optional model identifier"
+    },
+    "entity": {
+      "type": "string",
+      "description": "The physical entity being modeled"
+    },
+    "cycle": {
+      "type": "string",
+      "pattern": "^CPL-[0-9]+$|^CPL-infinity$",
+      "description": "Conformal Planck Loop identifier"
+    },
+    "frame": {
+      "type": "object",
+      "required": ["variable", "start", "end"],
+      "properties": {
+        "variable": {"type": "string"},
+        "start":    {"type": "number"},
+        "end":      {"type": "number"},
+        "units":    {"$ref": "#/$defs/unit_suffix"}
+      }
+    },
+    "units": {
+      "type": "string",
+      "enum": ["Planck", "SI", "PNMS"]
+    },
+    "blocks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/block"}
+    }
+  },
+  "$defs": {
+    "unit_suffix": {
+      "type": "string",
+      "enum": [
+        "Plaseconds", "Plameters", "WarpTick",
+        "Plasecond",  "Plameter",
+        "lambda_p",   "t_p",      "m_p",
+        "E_p",        "k_B",      "dimensionless"
+      ]
+    },
+
+    "block": {
+      "oneOf": [
+        {"$ref": "#/$defs/state_block"},
+        {"$ref": "#/$defs/entropy_block"},
+        {"$ref": "#/$defs/geometry_block"},
+        {"$ref": "#/$defs/stability_block"},
+        {"$ref": "#/$defs/collapse_block"},
+        {"$ref": "#/$defs/warp_block"},
+        {"$ref": "#/$defs/emit_block"},
+        {"$ref": "#/$defs/transition_block"},
+        {"$ref": "#/$defs/event_block"},
+        {"$ref": "#/$defs/comment_block"}
+      ]
+    },
+
+    "state_block": {
+      "type": "object",
+      "required": ["type", "name", "body"],
+      "properties": {
+        "type": {"const": "STATE"},
+        "name": {"type": "string"},
+        "body": {
+          "type": "object",
+          "required": ["init", "hamiltonian"],
+          "properties": {
+            "init": {
+              "oneOf": [
+                {"type": "number"},
+                {"type": "string", "pattern": "^\\|.+>$"},
+                {
+                  "type": "object",
+                  "required": ["superposition"],
+                  "properties": {
+                    "superposition": {
+                      "type": "array",
+                      "items": {"type": "string", "pattern": "^\\|.+>$"}
+                    }
+                  }
+                }
+              ]
+            },
+            "hamiltonian": {
+              "type": "string",
+              "$comment": "String value is interpreted by the transpiler as the QULT-C Hamiltonian (Eq. 4.1). Accepted values: H_QULT(R, S) or a custom MATH_EXPR."
+            }
+          }
+        }
+      }
+    },
+
+    "entropy_block": {
+      "type": "object",
+      "required": ["type", "name", "body"],
+      "properties": {
+        "type": {"const": "ENTROPY"},
+        "name": {"type": "string"},
+        "body": {
+          "type": "object",
+          "required": ["init", "max", "scale"],
+          "properties": {
+            "init":        {"type": "number"},
+            "max":         {"type": "number"},
+            "scale":       {"type": "number"},
+            "scale_units": {"$ref": "#/$defs/unit_suffix"}
+          }
+        }
+      }
+    },
+
+    "geometry_block": {
+      "type": "object",
+      "required": ["type", "field_equation"],
+      "properties": {
+        "type":           {"const": "GEOMETRY"},
+        "field_equation": {"type": "string"}
+      }
+    },
+
+    "stability_block": {
+      "type": "object",
+      "required": ["type", "metric_name", "metric_var", "expression"],
+      "properties": {
+        "type":        {"const": "STABILITY"},
+        "metric_name": {"type": "string"},
+        "metric_var":  {"type": "string"},
+        "expression":  {"type": "string"}
+      }
+    },
+
+    "collapse_block": {
+      "type": "object",
+      "required": ["type", "condition"],
+      "properties": {
+        "type":        {"const": "IF_COLLAPSE"},
+        "condition":   {"type": "string"},
+        "energy":      {"type": "string"},
+        "resolution":  {"type": "string"},
+        "decoherence": {"type": "string"}
+      }
+    },
+
+    "warp_block": {
+      "type": "object",
+      "required": ["type", "condition"],
+      "properties": {
+        "type":      {"const": "IF_WARP"},
+        "condition": {"type": "string"},
+        "velocity":  {"type": "string"},
+        "safety":    {"type": "string"},
+        "target":    {"type": "string"}
+      }
+    },
+
+    "emit_block": {
+      "type": "object",
+      "required": ["type", "condition"],
+      "properties": {
+        "type":      {"const": "IF_EMIT"},
+        "condition": {"type": "string"},
+        "energy":    {"type": "string"},
+        "decay":     {"type": "string"},
+        "event":     {"type": "string"}
+      }
+    },
+
+    "transition_block": {
+      "type": "object",
+      "required": ["type", "event", "statements"],
+      "properties": {
+        "type":  {"const": "ON_TRANSITION"},
+        "event": {"type": "string"},
+        "statements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["variable", "expression"],
+            "properties": {
+              "variable":   {"type": "string"},
+              "expression": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+
+    "event_block": {
+      "type": "object",
+      "required": ["type", "name", "statements"],
+      "properties": {
+        "type": {"const": "EVENT"},
+        "name": {"type": "string"},
+        "statements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["variable", "expression"],
+            "properties": {
+              "variable":   {"type": "string"},
+              "expression": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+
+    "comment_block": {
+      "type": "object",
+      "required": ["type", "text"],
+      "description": "COMMENT blocks (# ...) are stripped by the COMAF-Lite parser before AST construction. Represented here for round-trip serialization fidelity; no semantic content.",
+      "properties": {
+        "type": {"const": "COMMENT"},
+        "text": {"type": "string"}
+      }
+    }
+  }
+}
