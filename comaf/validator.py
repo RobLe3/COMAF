@@ -10,9 +10,6 @@ from .ast import (ProgramNode, StateBlockNode, EntropyBlockNode,
 from . import pnms
 
 
-@dataclass_like = None  # avoid import issue — use plain class
-
-
 class ValidationError:
     def __init__(self, message: str, severity: str = "error"):
         self.message = message
