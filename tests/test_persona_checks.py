@@ -221,54 +221,36 @@ class TestP30TestCaseDesign:
 
     def test_all_stdlib_models_parseable(self):
         """P30-Q2: All 8 stdlib models must parse without raising exceptions."""
-        from comaf.lexer import Lexer
-        from comaf.parser import Parser
+        from comaf.parser import parse
 
         for model_file in STDLIB_DIR.glob("*.comaf"):
             source = model_file.read_text()
             try:
-                lexer = Lexer(source)
-                tokens = lexer.tokenize()
-                parser = Parser(tokens)
-                ast = parser.parse()
+                ast = parse(source)
                 assert ast is not None, f"{model_file.name}: parser returned None"
             except Exception as e:
                 pytest.fail(f"{model_file.name}: parse failed with {type(e).__name__}: {e}")
 
     def test_dho_model_a_has_entropy_block(self):
         """P30-Q1: DHO Model A must have an ENTROPY block (it drives the damping)."""
-        from comaf.lexer import Lexer
-        from comaf.parser import Parser
+        from comaf.parser import parse
+        from comaf.ast import EntropyBlockNode
 
         source = (STDLIB_DIR / "dho_model_a_entropy_damping.comaf").read_text()
-        lexer = Lexer(source)
-        tokens = lexer.tokenize()
-        parser = Parser(tokens)
-        ast = parser.parse()
+        ast = parse(source)
 
-        # Verify entropy block is present
-        has_entropy = any(
-            "ENTROPY" in str(type(block).__name__).upper()
-            for block in ast.blocks
-        )
+        has_entropy = any(isinstance(block, EntropyBlockNode) for block in ast.blocks)
         assert has_entropy, "DHO Model A: ENTROPY block not found in AST"
 
     def test_dho_model_b_has_collapse_block(self):
         """P30-Q1: DHO Model B must have a collapse block (rendering-threshold mechanism)."""
-        from comaf.lexer import Lexer
-        from comaf.parser import Parser
+        from comaf.parser import parse
+        from comaf.ast import CollapseBlockNode
 
         source = (STDLIB_DIR / "dho_model_b_rendering_damping.comaf").read_text()
-        lexer = Lexer(source)
-        tokens = lexer.tokenize()
-        parser = Parser(tokens)
-        ast = parser.parse()
+        ast = parse(source)
 
-        has_collapse = any(
-            "COLLAPSE" in str(type(block).__name__).upper() or
-            "IF" in str(type(block).__name__).upper()
-            for block in ast.blocks
-        )
+        has_collapse = any(isinstance(block, CollapseBlockNode) for block in ast.blocks)
         assert has_collapse, "DHO Model B: collapse/IF block not found in AST"
 
     def test_wolfram_tc_files_count(self):
@@ -299,10 +281,11 @@ class TestP30TestCaseDesign:
     def test_pnms_module_importable(self):
         """P30-Q6: comaf.pnms must be importable and expose Planck constants."""
         from comaf import pnms
-        # Must have at least the basic Planck units
-        assert hasattr(pnms, "PLANCK_LENGTH") or hasattr(pnms, "planck_length") or \
-               hasattr(pnms, "lp") or hasattr(pnms, "l_p"), \
-               "pnms module must expose Planck length constant"
+        # Must have at least the basic Planck units (LAMBDA_P = Planck length)
+        assert hasattr(pnms, "LAMBDA_P"), \
+               "pnms module must expose LAMBDA_P (Planck length constant)"
+        assert hasattr(pnms, "T_P"), \
+               "pnms module must expose T_P (Planck time constant)"
 
 
 # ─────────────────────────────────────────────────────────────
@@ -429,7 +412,8 @@ class TestP31PhysicalVerification:
 
     def test_pnms_quasiplanck_order_of_magnitude(self):
         """P31-Q6: Quasiplanck ≈ 1.616×10^26 m, same order as Hubble radius ~4.4×10^26 m."""
-        quasiplanck = self.PLANCK_LENGTH_M * 1e61  # 10^61 × λ_p
+        from comaf import pnms
+        quasiplanck = pnms.LAMBDA_P * 1e61  # 10^61 × λ_p
         hubble_radius_m = 4.4e26  # approximate Hubble radius in meters
         # Quasiplanck should be within a factor of 10 of Hubble radius
         ratio = hubble_radius_m / quasiplanck

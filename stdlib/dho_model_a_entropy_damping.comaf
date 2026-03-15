@@ -32,14 +32,14 @@ ENTROPY S:
     scale: 10.0 Plaseconds
   }
 
-STATE psi:
-  evolve Schrodinger {
-    init: superposition[|x_0>, |p_0>]
-    hamiltonian: H_QULT(R=0, S)
+STATE ψ:
+  evolve Schrödinger {
+    init: superposition[|x_0⟩, |p_0⟩]
+    hamiltonian: H = H_kinetic + H_spring + H_entropy
   }
 
 STABILITY:
-  metric D(t) = exp(-|grad_S(t)| * t)
+  metric D(t) = exp(-|∇S(t)| · t)
 
 ON cycle.end:
   S = S / (1 + alpha_r)

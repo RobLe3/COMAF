@@ -70,14 +70,17 @@ TOKEN_PATTERNS = [
     (TT_COMMENT,   r'#[^\n]*'),
     (TT_STATE_REF, r'\|[^⟩]+⟩'),               # |x⟩ state literals
     (TT_NUMBER,    r'[+-]?[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?'),
-    (TT_OP,        r'∈|·=|>=|<=|==|!=|[+\-*/^<>=!]'),
+    (TT_OP,        r'∈|·=|>=|<=|==|!=|\(|\)|[+\-*/^<>=!·\|.½⅓⅔¼¾]'),  # ( ) | . added
     (TT_BRACE_L,   r'\{'),
     (TT_BRACE_R,   r'\}'),
     (TT_BRACKET_L, r'\['),
     (TT_BRACKET_R, r'\]'),
     (TT_COMMA,     r','),
     (TT_COLON,     r':'),
-    (TT_IDENT,     r'[A-Za-zÀ-ÖØ-öø-ÿ_ψφΨΦΩωαβγδλ∇∈][A-Za-z0-9_ψφΨΦΩωαβγδλ∇∈\-]*'),
+    # Extended IDENT: ASCII + Latin extended + Greek (full block) + math symbols
+    # Continuation class includes Latin extended so Schrödinger parses as one token.
+    (TT_IDENT,     r'[A-Za-zÀ-ÖØ-öø-ÿ_\u0391-\u03C9∇∈∞ħ⁰¹²³⁴⁵⁶⁷⁸⁹]'
+                   r'[A-Za-z0-9À-ÖØ-öø-ÿ_\u0391-\u03C9∇∈∞ħ⁰¹²³⁴⁵⁶⁷⁸⁹\-]*'),
     ('WHITESPACE',  r'[ \t]+'),
     (TT_NEWLINE,   r'\n'),
     ('MISMATCH',   r'.'),

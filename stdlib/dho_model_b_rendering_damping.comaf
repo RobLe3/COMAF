@@ -39,14 +39,14 @@ ENTROPY S:
     scale: 10.0 Plaseconds
   }
 
-STATE psi:
-  evolve Schrodinger {
-    init: superposition[|x_0>, |p_0>]
-    hamiltonian: H_QULT(R=0, S)
+STATE ψ:
+  evolve Schrödinger {
+    init: superposition[|x_0⟩, |p_0⟩]
+    hamiltonian: H = H_kinetic + H_spring + H_threshold
   }
 
 STABILITY:
-  metric D(t) = exp(-|grad_S(t)| * t)
+  metric D(t) = exp(-|∇S(t)| · t)
 
 IF D(t) < 0.95:
   collapse {

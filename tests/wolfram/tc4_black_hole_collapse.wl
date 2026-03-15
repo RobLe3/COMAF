@@ -23,8 +23,8 @@ A  = 4*Pi*(2*G*M/c^2)^2;
 BH_entropy = (kB * c^3 * A) / (4 * G * hbar);
 AreaPixels = A / lambdaP^2;
 
-Print["BH entropy (1 Msun): ", N[BH_entropy]]  (* Expected: ~4.20e77 J/K *)
-Print["BH area pixels:       ", N[AreaPixels]]  (* Expected: ~4.20e77 *)
+Print["BH entropy (1 Msun): ", N[BH_entropy]]  (* Expected: ~1.05e77 k_B = 1.45e54 J/K; canonical value from Loop 4 fix *)
+Print["BH area pixels:       ", N[AreaPixels]]  (* Expected: ~1.05e77 Planck-area tiles (Bekenstein) *)
 
 (* === Collapse Simulation === *)
 Rmax = 1*10^44;  (* Collapse curvature threshold in Ricci-Bits *)
