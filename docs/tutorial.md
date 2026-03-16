@@ -104,11 +104,12 @@ t_end: 50.0 Plaseconds  steps: 10
 ✓ Simulation complete: 10 steps
 ```
 
-**Transpile to Python:**
+**Transpile to Python (standalone):**
 
 ```bash
 comaf run my_first.comaf --target python
-# → Writes my_first.py
+# → Writes my_first.py  (runs with only numpy + scipy — no comaf package required)
+python my_first.py
 ```
 
 **Transpile to Wolfram:**
@@ -338,7 +339,7 @@ Transpiles to Wolfram or Python:
 
 ```bash
 comaf run model.comaf --target mathematica  # writes model.wl
-comaf run model.comaf --target python       # writes model.py
+comaf run model.comaf --target python       # writes model.py (standalone — only numpy + scipy needed)
 ```
 
 ### `comaf simulate`
@@ -473,7 +474,8 @@ Try:
 ```bash
 comaf validate stdlib/bounce_cosmology.comaf
 comaf explain stdlib/bounce_cosmology.comaf
-comaf run stdlib/bounce_cosmology.comaf --target python
+comaf run stdlib/bounce_cosmology.comaf --target python   # → bounce_cosmology.py (standalone)
+python bounce_cosmology.py                                # runs with only numpy + scipy
 comaf simulate stdlib/bounce_cosmology.comaf --t-end 1000
 ```
 

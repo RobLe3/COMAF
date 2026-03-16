@@ -27,7 +27,7 @@ Maps every claim in the QULT-C paper (v1.337lulz) to its implementation in this 
 | §7 COMAF-Lite | Parser — recursive descent → AST | `comaf/parser.py` | ✓ | 373+ lines; all block types including addendum |
 | §7 COMAF-Lite | Semantic validator (5-level) | `comaf/validator.py` | ✓ | v1.3.19 — syntax + schema + semantic + dimensional + solver levels |
 | §7 COMAF-Lite | Wolfram transpiler | `comaf/transpilers/mathematica.py` | ✓ | All block types covered including addendum |
-| §7 COMAF-Lite | Python transpiler | `comaf/transpilers/python.py` | ✓ | ODE scaffold with solve_ivp; addendum keywords supported |
+| §7 COMAF-Lite | Python transpiler | `comaf/transpilers/python.py` | ✓ | ODE scaffold with solve_ivp; addendum keywords supported; PNMS constants inlined — output is standalone (numpy + scipy only) |
 | §7 COMAF-Lite | AST serializer/deserializer | `comaf/serializer.py`, `comaf/deserializer.py` | ✓ | v1.3.18 — round-trip verified |
 | §7 COMAF-Lite | `comaf simulate` execution | `comaf/runner.py` | ✓ | v1.3.28 — numerical ODE simulation |
 | §8 Demo Cases | TC1 — Entropy-Reversal Bounce Cosmology | `tests/wolfram/tc1_bounce_cosmology.wl` | ✓ VFR-301 | Wolfram Cloud verified March 2026 |
@@ -95,3 +95,10 @@ The validator (`comaf/validator.py`) currently checks:
 | wolframscript automated runner for TC files | Requires Wolfram license in CI | Out of scope |
 | Denotational semantics / transpiler soundness proof | Research task, companion paper | Research |
 | Ω̂ symbolic evaluation | Pure interpretive machinery; stored as string | Research |
+
+## Recently Resolved (no longer gaps)
+
+| Item | Resolution |
+|------|------------|
+| `--strict` rejected GEOMETRY-containing models | Fixed: `skip_newlines()` in `parse_geometry_block()` — `field_equation` on next line now parsed correctly |
+| Transpiled `.py` required `comaf` package | Fixed: PNMS constants and helper functions inlined in Python transpiler header |

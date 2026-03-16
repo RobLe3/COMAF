@@ -86,11 +86,12 @@ comaf run my_model.comaf --target mathematica
 # Writes: my_model.wl
 ```
 
-**Transpile to Python/NumPy:**
+**Transpile to Python/NumPy (standalone):**
 
 ```bash
 comaf run my_model.comaf --target python
-# Writes: my_model.py
+# Writes: my_model.py  (runs with only numpy + scipy — no comaf package required)
+python my_model.py
 ```
 
 **Convert SI units to PNMS:**
@@ -348,7 +349,8 @@ comaf-interpreter/
 | §6.5 BH Entropy | S_BH ≈ 1.05×10⁷⁷ k_B | ✓ `stdlib/bh_entropy_physical.comaf` — v1.3.25 |
 | §7 COMAF-Lite | EBNF grammar | ✓ `docs/comaf_lite.ebnf` v0.2 — aligned incl. addendum |
 | §7 COMAF-Lite | JSON Schema | ✓ `docs/comaf_lite_schema.json` v1.337.0 — aligned |
-| §7 COMAF-Lite | 5-level semantic validator | ✓ `comaf/validator.py` — syntax/schema/semantic/dimensional/scope |
+| §7 COMAF-Lite | 5-level semantic validator | ✓ `comaf/validator.py` — syntax/schema/semantic/dimensional/scope; `--strict` mode fully functional |
+| §7 COMAF-Lite | Python transpiler — standalone output | ✓ `comaf/transpilers/python.py` — inlined PNMS constants; only numpy + scipy required |
 | §7 COMAF-Lite | Execution layer | ✓ `comaf/runner.py`, `comaf simulate` — v1.3.28 |
 | §8 Demo Cases | TC1–TC4 verified | ✓ `tests/wolfram/tc1–tc4.wl` — Wolfram Cloud verified (VFR-301–304) |
 | §10 Falsifiability | TC5/TC6 DHO cases | ✓ `tests/wolfram/tc5,tc6.wl` + Python stubs in `tests/test_transpiler_calibration.py` |

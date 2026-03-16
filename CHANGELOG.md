@@ -1,5 +1,30 @@
 # CHANGELOG — COMAF-Lite
 
+## v1.3.30 (2026-03-16) — Bug fixes: GEOMETRY parser + standalone Python output
+
+### v1.3.30 — Two deferred gaps resolved
+
+- **`comaf/parser.py`**: Added `skip_newlines()` in `parse_geometry_block()` before
+  checking for the `field_equation` keyword. Previously, `field_equation:` on the line
+  after `GEOMETRY:` was skipped (no newline skip → match failed), leaving the
+  `GeometryBlockNode` empty and the field equation parsed as an orphan `AssignmentNode`.
+  `--strict` mode now correctly accepts all 14 stdlib models, including those with
+  GEOMETRY blocks.
+
+- **`comaf/transpilers/python.py`**: Replaced `from comaf.pnms import ...` in the
+  generated file header with inlined PNMS constants (`HBAR`, `C`, `LAMBDA_P`,
+  `PLASECOND`, etc.) and the five helper functions (`l_eff`, `psi_factor`, `e_jump`,
+  `decoherence_metric`, `f_collapse`). Transpiled `.py` files now run standalone with
+  only `numpy` and `scipy` — the `comaf` package is not required.
+
+- **`tests/fixtures/`**: Regenerated 6 structural snapshots for stdlib models with
+  GEOMETRY blocks (previously captured empty `field_equation`; now correct).
+
+- **`tests/test_strict_mode.py`**: Updated `WARNS_MODEL` to use a genuinely empty
+  GEOMETRY block rather than the now-fixed newline-parsing behaviour.
+
+---
+
 ## v1.3.29 (2026-03-16) — Numerical Calibration Tests + Phase 2 Sprint
 
 **Summary:** Phase 2 sprint (v1.3.15–v1.3.29) brings repo to full paper-level feature parity.
