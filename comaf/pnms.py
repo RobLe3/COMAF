@@ -40,7 +40,7 @@ PLAHOUR = 3600 * PLASECOND                       # ≈ 1 hr
 PLACENTURY = 3.15576e9 * PLASECOND               # ≈ 100 yr
 WARPTICK = 10**_WARPTICK_EXP * T_P              # ≈ 13.8 Gyr (one CPL)
 QUASIPLANCK = 10**_QUASIPLANCK_EXP * LAMBDA_P   # ≈ Hubble radius
-PLAJOULE = 1e9 * E_P                             # ≈ 1 GJ
+PLAJOULE = 1e9 * E_P                             # ≈ 1.956e18 J (2 exajoules; note: E_p ≈ 2 GJ, not 1 nJ)
 PLAKILOGRAM = 10**_PLAKILOGRAM_EXP * M_P         # ≈ 1 kg
 
 # PNMS astronomical distances (in Plameters)

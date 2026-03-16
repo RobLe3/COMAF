@@ -163,7 +163,9 @@ class Parser:
         self.expect(TT_COLON)
         self.skip_newlines()
         self.expect_keyword("evolve")
+        # Accept "Schrödinger" (with umlaut, canonical) or "Schrodinger" (ASCII fallback)
         self.consume_if(TT_KEYWORD, "Schrödinger")
+        self.consume_if(TT_IDENT, "Schrodinger")
         self.expect(TT_BRACE_L)
 
         init_val: Any = None

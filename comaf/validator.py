@@ -167,8 +167,13 @@ class Validator:
 
         elif isinstance(block, StabilityBlockNode):
             self.defined_names.add(block.metric_name)
+            # Extract the numeric literal from expressions like "( t ) = 5.0" or "5.0"
+            import re as _re
+            _expr = block.expression.strip()
+            _m = _re.search(r'=\s*([+-]?[0-9]*\.?[0-9]+(?:[eE][+-]?[0-9]+)?)\s*$', _expr)
+            _literal = _m.group(1) if _m else _expr
             try:
-                metric_value = float(block.expression.strip())
+                metric_value = float(_literal)
                 if metric_value < 0 or metric_value > 1:
                     self._add(
                         f"STABILITY block '{block.metric_name}': decoherence metric D(t) "
@@ -306,8 +311,13 @@ class DimensionalChecker:
 
     def _check_stability_dimensions(self, block: StabilityBlockNode) -> None:
         """STABILITY metric result must be dimensionless ∈ [0,1]."""
+        import re as _re
+        _expr = block.expression.strip()
+        # Parser stores "( t ) = 5.0" for "metric D(t) = 5.0" — extract trailing literal
+        _m = _re.search(r'=\s*([+-]?[0-9]*\.?[0-9]+(?:[eE][+-]?[0-9]+)?)\s*$', _expr)
+        _literal = _m.group(1) if _m else _expr
         try:
-            val = float(block.expression.strip())
+            val = float(_literal)
             if not (0.0 <= val <= 1.0):
                 self._add(
                     f"Dimensional: STABILITY '{block.metric_name}' literal value "

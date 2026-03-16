@@ -148,7 +148,8 @@ def cmd_explain(args):
 
     from .ast import (StateBlockNode, EntropyBlockNode, GeometryBlockNode,
                       StabilityBlockNode, CollapseBlockNode, WarpBlockNode,
-                      EmitBlockNode, TransitionBlockNode, AssignmentNode)
+                      EmitBlockNode, TransitionBlockNode, AssignmentNode,
+                      PhysicsQuantityNode)
 
     wl_lines = transpile_mathematica(program).splitlines()
     py_lines = transpile_python(program).splitlines()
@@ -215,6 +216,15 @@ def cmd_explain(args):
         elif isinstance(block, AssignmentNode):
             print(f"  Source:  {block.target} {block.operator} {block.expression[:50]}")
             print(f"  Note:    Top-level assignment (from field_equation line parse artifact)")
+
+        elif isinstance(block, PhysicsQuantityNode):
+            unit_note = f"  [{block.unit}]" if block.unit else ""
+            print(f"  Source:  {block.keyword} {block.name}: {block.expression[:60]}{unit_note}")
+            py_key = f"def {block.keyword.lower()}_{block.name}"
+            py_ex = next((ln.strip() for ln in py_lines if py_key in ln), "(see .py output)")
+            wl_ex = next((ln.strip() for ln in wl_lines if f"{block.name}[t_]" in ln), "(see .wl output)")
+            print(f"  Wolfram: {wl_ex}")
+            print(f"  Python:  {py_ex}")
 
         else:
             print(f"  Source:  {repr(block)[:80]}")
