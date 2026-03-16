@@ -5,5 +5,5 @@ from .parser import parse, ParseError
 from .ast import ProgramNode
 from . import pnms
 
-__version__ = "0.1.0"
+__version__ = "1.337.0"
 __all__ = ["tokenize", "parse", "pnms", "ProgramNode", "LexerError", "ParseError"]

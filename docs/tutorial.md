@@ -418,10 +418,10 @@ Convert SI values to PNMS units:
 
 ```bash
 comaf convert --si-to-pnms 1.0 m
-# → 1.0 m = 6.187e-36 Plameters
+# → 1.0 m = 6.187e-01 Plameters
 
 comaf convert --si-to-pnms 1.0 s
-# → 1.0 s = 1.855e-44 Plaseconds
+# → 1.0 s = 1.855e-01 Plaseconds
 ```
 
 ---

@@ -116,4 +116,4 @@ Test count: 86 → 289. 14 new stdlib models. `comaf simulate` execution layer.
 
 ---
 
-*Versioning follows the roadmap in `review/roadmap_v1_337.md`. Target: v1.337 (pre-submission).*
+*Final version: v1.337lulz (March 2026). See TRACEABILITY.md for the full paper-to-repo mapping.*

@@ -98,7 +98,7 @@ python my_model.py
 
 ```bash
 comaf convert --si-to-pnms 1.0 m
-# Output: 1.0 m = 6.187e-36 Plameters
+# Output: 1.0 m = 6.187e-01 Plameters
 ```
 
 ---
