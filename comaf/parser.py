@@ -252,6 +252,7 @@ class Parser:
     def parse_geometry_block(self) -> GeometryBlockNode:
         self.expect_keyword("GEOMETRY")
         self.expect(TT_COLON)
+        self.skip_newlines()
         field_eq = ""
 
         # Check for field_equation keyword

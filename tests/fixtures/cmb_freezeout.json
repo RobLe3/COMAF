@@ -2,12 +2,11 @@
   "entity": "ObservableUniverse",
   "cycle": "CPL-1",
   "units": "Planck",
-  "block_count": 6,
+  "block_count": 5,
   "block_types": [
     "StateBlockNode",
     "EntropyBlockNode",
     "GeometryBlockNode",
-    "AssignmentNode",
     "StabilityBlockNode",
     "CollapseBlockNode"
   ]

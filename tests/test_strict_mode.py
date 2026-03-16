@@ -32,8 +32,7 @@ ENTROPY S:
   }
 """
 
-# Model with a warning: GEOMETRY block with no field_equation (empty because
-# field_equation is on the next line — known parser behaviour).
+# Model with a warning: GEOMETRY block that has no field_equation at all.
 WARNS_MODEL = """\
 ENTITY: TestEntity
 CYCLE: CPL-1
@@ -41,7 +40,6 @@ FRAME: t ∈ [0, 1 WarpTick]
 UNITS: Planck
 
 GEOMETRY:
-  field_equation: G = 0
 """
 
 # Model with a real semantic error: negative entropy init.
@@ -184,7 +182,7 @@ def test_strict_mode_rejects_warnings():
     """In strict mode, a model with warnings should be considered failed."""
     prog = parse(WARNS_MODEL)
     result = validate_structured(prog)
-    # GEOMETRY with no field_equation → warning
+    # GEOMETRY with no field_equation at all → warning
     has_warnings = any(e.severity == "warning" for e in result.issues)
     assert has_warnings, "Expected at least one warning from GEOMETRY block"
     # Strict: treat any warning as failure

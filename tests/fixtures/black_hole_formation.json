@@ -2,12 +2,11 @@
   "entity": "StellarCollapse",
   "cycle": "CPL-3",
   "units": "Planck",
-  "block_count": 7,
+  "block_count": 6,
   "block_types": [
     "EntropyBlockNode",
     "StateBlockNode",
     "GeometryBlockNode",
-    "AssignmentNode",
     "StabilityBlockNode",
     "CollapseBlockNode",
     "TransitionBlockNode"
