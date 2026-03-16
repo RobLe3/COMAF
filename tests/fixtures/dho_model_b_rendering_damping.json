@@ -1,0 +1,13 @@
+{
+  "entity": "DampedOscillatorRenderingThreshold",
+  "cycle": "CPL-local",
+  "units": "Planck",
+  "block_count": 5,
+  "block_types": [
+    "EntropyBlockNode",
+    "StateBlockNode",
+    "StabilityBlockNode",
+    "CollapseBlockNode",
+    "TransitionBlockNode"
+  ]
+}

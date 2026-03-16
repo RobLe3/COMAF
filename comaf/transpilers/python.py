@@ -6,7 +6,8 @@ Converts a ProgramNode AST into a Python simulation script.
 from typing import List
 from ..ast import (ProgramNode, StateBlockNode, EntropyBlockNode,
                    GeometryBlockNode, StabilityBlockNode, CollapseBlockNode,
-                   WarpBlockNode, EmitBlockNode, TransitionBlockNode, Node)
+                   WarpBlockNode, EmitBlockNode, TransitionBlockNode,
+                   PhysicsQuantityNode, Node)
 
 
 PYTHON_HEADER = """\
@@ -67,6 +68,8 @@ class PythonTranspiler:
             self._emit_warp(block)
         elif isinstance(block, TransitionBlockNode):
             self._emit_transition(block)
+        elif isinstance(block, PhysicsQuantityNode):
+            self._emit_physics_quantity(block)
 
     def _emit_entropy(self, b: EntropyBlockNode):
         self._emit(f"# ENTROPY {b.name}")
@@ -104,13 +107,53 @@ class PythonTranspiler:
         self._emit(f"    return S / (1 + alpha), psi")
         self._emit()
 
+    def _emit_physics_quantity(self, b: PhysicsQuantityNode):
+        import re as _re
+        unit_comment = f"  # unit: {b.unit}" if b.unit else ""
+        kw_lower = b.keyword.lower()
+        self._emit(f"# {b.keyword} {b.name}{unit_comment}")
+        # Translate math tokens to numpy equivalents (handle spaces from parser)
+        expr = b.expression
+        expr = _re.sub(r'cos\s*\(', 'np.cos(', expr)
+        expr = _re.sub(r'sin\s*\(', 'np.sin(', expr)
+        expr = _re.sub(r'exp\s*\(', 'np.exp(', expr)
+        expr = expr.replace("^", "**")
+        self._emit(f"def {kw_lower}_{b.name}(t):")
+        self._emit(f"    return {expr if expr else 'None'}")
+        self._emit()
+
     def _emit_main(self):
+        # Find entropy block for ODE constants (fallback to literals if absent)
+        entropy_block = next(
+            (b for b in self.program.blocks if isinstance(b, EntropyBlockNode)), None
+        )
+        s_init = f"S0_{entropy_block.name}" if entropy_block else "1.0"
+        s_max  = f"Smax_{entropy_block.name}" if entropy_block else "1.0"
+        tau    = f"tau_{entropy_block.name}" if entropy_block else "WARPTICK"
+
         self._emit('if __name__ == "__main__":')
         self._emit('    import matplotlib.pyplot as plt')
+        self._emit(f'    print(f"Model: {{{self.program.entity!r}}}, Cycle: {{{self.program.cycle!r}}}")')
         self._emit(f'    t_span = (0, WARPTICK)')
         self._emit(f'    t_eval = np.linspace(0, WARPTICK, 1000)')
-        self._emit(f'    print(f"Model: {{{self.program.entity!r}}}, Cycle: {{{self.program.cycle!r}}}")')
-        self._emit(f'    print("Simulation ready. Implement ODE system and call solve_ivp.")')
+        self._emit(f'    S_MAX   = {s_max}')
+        self._emit(f'    TAU     = {tau}')
+        self._emit(f'    S_INIT  = {s_init}')
+        self._emit(f'    ALPHA_D = 1e-9  # decoherence coupling upper bound (BEC data)')
+        self._emit(f'    GRAD_S  = 1.0   # entropy gradient (PNMS units)')
+        self._emit()
+        self._emit(f'    def odes(t, y):')
+        self._emit(f'        S, D = y')
+        self._emit(f'        dS_dt = (S_MAX - S) / TAU')
+        self._emit(f'        dD_dt = -ALPHA_D * GRAD_S * D')
+        self._emit(f'        return [dS_dt, dD_dt]')
+        self._emit()
+        self._emit(f'    y0 = [S_INIT, 1.0]')
+        self._emit(f'    sol = solve_ivp(odes, t_span, y0, t_eval=t_eval, method="RK45", dense_output=True)')
+        self._emit(f'    plt.plot(sol.t, sol.y[0], label="S(t)")')
+        self._emit(f'    plt.plot(sol.t, sol.y[1], label="D(t)")')
+        self._emit(f'    plt.xlabel("Time (Plaseconds)"); plt.ylabel("Value")')
+        self._emit(f'    plt.legend(); plt.show()')
 
 
 def transpile_python(program: ProgramNode) -> str:

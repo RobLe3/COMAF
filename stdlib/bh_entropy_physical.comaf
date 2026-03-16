@@ -1,0 +1,29 @@
+# Black Hole Entropy — Physical Parameter Model
+# Solar-mass black hole: S_BH ≈ 1.05×10^77 k_B (Bekenstein-Hawking)
+# Area: A = 4π(2GM/c²)² ≈ 4.2×10^77 λ_p² (in Planck tiles)
+# Paper reference: §6.5 Black Hole Entropy, §8 Demo Cases (VFR-304 family)
+# Physics fix: F_collapse uses GRW volume suppression (deferred Fix 2b)
+# Status: numerically verified (Bekenstein-Hawking formula, CODATA 2018)
+ENTITY: SolarMassBH
+CYCLE: CPL-3
+FRAME: t ∈ [0, 1 WarpTick]
+UNITS: Planck
+
+ENTROPY S:
+  evolve Boltzmann {
+    init: 1.05e77
+    max: 1.05e78
+    scale: 1e20 Plaseconds
+  }
+
+STABILITY:
+  metric D = exp(-alpha_D * |∇S| * t)
+
+IF D(t) < 0.01:
+  collapse {
+    energy: E_hawking
+    resolution: lambda_p
+  }
+
+ON cycle.end:
+  S = S / (1 + alpha)

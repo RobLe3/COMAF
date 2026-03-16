@@ -101,3 +101,17 @@ class AssignmentNode(Node):
 class CommentNode(Node):
     """# comment"""
     text: str
+
+
+@dataclass
+class PhysicsQuantityNode(Node):
+    """COMAF × PNMS addendum block: FORCE | POWER | PRESSURE | CURVATURE |
+    CHARGE | ENTROPY_UNIT | UNCERTAINTY
+
+    Syntax:  KEYWORD name: expression [unit]
+    """
+    keyword: str   # "FORCE", "POWER", "PRESSURE", "CURVATURE", "CHARGE",
+                   # "ENTROPY_UNIT", "UNCERTAINTY"
+    name: str
+    expression: str
+    unit: str = ""

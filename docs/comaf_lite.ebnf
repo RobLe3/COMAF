@@ -1,6 +1,8 @@
-(* COMAF-Lite EBNF Grammar v0.1 — ISO 14977 Notation
-   Extracted from QULT-C paper Appendix C (v1.3.0-review)
-   See: docs/QULT-C_v1.3.0-review.pdf, Appendix C *)
+(* COMAF-Lite EBNF Grammar v0.2 — ISO 14977 Notation
+   Aligned with QULT-C paper Appendix C (v1.337lulz)
+   v0.2: Added COMAF × PNMS addendum block types (v1.3.22)
+         FORCE, POWER, PRESSURE, CURVATURE, CHARGE, ENTROPY_UNIT, UNCERTAINTY
+   See: docs/comaf_lite_schema.json, TRACEABILITY.md §3 *)
 
 (* ─────────────────────────────────────────────────────────────
    Program Structure
@@ -31,6 +33,7 @@ BLOCK             ::= STATE_BLOCK
                     | EMIT_BLOCK
                     | TRANSITION_BLOCK
                     | EVENT_BLOCK
+                    | PHYSICS_QUANTITY_BLOCK
                     | COMMENT
 
 (* ─────────────────────────────────────────────────────────────
@@ -131,6 +134,21 @@ EVENT_BODY        ::= STATEMENT+
 COMMENT           ::= '#' .* NEWLINE
 
 (* ─────────────────────────────────────────────────────────────
+   COMAF × PNMS Addendum Block Types (v1.3.22)
+   Maps to PNMS extended unit layer.  All share the same syntax.
+   ───────────────────────────────────────────────────────────── *)
+
+PHYSICS_QUANTITY_BLOCK ::= PHYSICS_QUANTITY_KW IDENT ':' MATH_EXPR UNIT_SUFFIX?
+
+PHYSICS_QUANTITY_KW    ::= 'FORCE'
+                         | 'POWER'
+                         | 'PRESSURE'
+                         | 'CURVATURE'
+                         | 'CHARGE'
+                         | 'ENTROPY_UNIT'
+                         | 'UNCERTAINTY'
+
+(* ─────────────────────────────────────────────────────────────
    Conditions, Expressions, and Tokens
    ───────────────────────────────────────────────────────────── *)
 
@@ -171,10 +189,12 @@ PARAM_LIST        ::= IDENT (',' IDENT)*
 
 LOCATION          ::= 'sector' '::' IDENT '::' IDENT '->' IDENT '::' IDENT
 
-UNIT_SUFFIX       ::= 'Plaseconds' | 'Plameters' | 'WarpTick'
-                    | 'Plasecond'  | 'Plameter'
-                    | 'lambda_p'   | 't_p'       | 'm_p'
-                    | 'E_p'        | 'k_B'
+UNIT_SUFFIX       ::= 'Plaseconds' | 'Plameters'   | 'WarpTick'
+                    | 'Plasecond'  | 'Plameter'    | 'PlaNewtons'
+                    | 'lambda_p'   | 't_p'         | 'm_p'
+                    | 'E_p'        | 'k_B'         | 'Ricci-Bits'
+                    | 'PlaWatts'   | 'PlaPascals'  | 'PlaCoulombs'
+                    | 's'          | 'm'            | 'J'         | 'kg'
 
 VALUE             ::= SCALAR | IDENT | FUNCTION_CALL
 
@@ -199,10 +219,12 @@ INDENT            ::= '  ' | '\t'     (* 2 spaces or one tab *)
    Reserved Keywords
    ───────────────────────────────────────────────────────────── *)
 
-(* MODEL, UNIVERSE, ENTITY, CYCLE, FRAME, UNITS,
-   STATE, ENTROPY, GEOMETRY, STABILITY,
-   IF, ON, EVENT, collapse, warp,
-   emit, evolve, Schrodinger, Boltzmann,
-   superposition, field_equation, metric,
-   AND, OR, Planck, SI, PNMS,
-   cycle.end, warp.complete *)
+(* Core: MODEL, UNIVERSE, ENTITY, CYCLE, FRAME, UNITS,
+         STATE, ENTROPY, GEOMETRY, STABILITY,
+         IF, ON, EVENT, collapse, warp,
+         emit, evolve, Schrodinger, Boltzmann,
+         superposition, field_equation, metric,
+         AND, OR, Planck, SI, PNMS,
+         cycle.end, warp.complete
+   Addendum (v1.3.22): FORCE, POWER, PRESSURE, CURVATURE,
+                        CHARGE, ENTROPY_UNIT, UNCERTAINTY *)

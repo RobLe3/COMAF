@@ -1,0 +1,12 @@
+{
+  "entity": "DampedOscillatorEntropyFlow",
+  "cycle": "CPL-local",
+  "units": "Planck",
+  "block_count": 4,
+  "block_types": [
+    "EntropyBlockNode",
+    "StateBlockNode",
+    "StabilityBlockNode",
+    "TransitionBlockNode"
+  ]
+}

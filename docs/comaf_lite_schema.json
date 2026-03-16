@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://comaf.io/schema/comaf-lite-0.1.json",
+  "$id": "https://comaf.io/schema/comaf-lite-1.337.0.json",
   "title": "COMAF-Lite Model",
-  "description": "Schema for COMAF-Lite v0.1 physical models. Extracted from QULT-C paper Appendix D (v1.3.0-review). See docs/QULT-C_v1.3.0-review.pdf, Appendix D.",
+  "description": "Schema for COMAF-Lite v1.337.0 physical models. Aligned with QULT-C paper Appendix D (v1.337lulz). v0.2: added PHYSICS_QUANTITY block type (FORCE/POWER/PRESSURE/CURVATURE/CHARGE/ENTROPY_UNIT/UNCERTAINTY). See TRACEABILITY.md.",
   "type": "object",
   "required": ["entity", "cycle", "frame", "units", "blocks"],
   "properties": {
@@ -43,10 +43,12 @@
     "unit_suffix": {
       "type": "string",
       "enum": [
-        "Plaseconds", "Plameters", "WarpTick",
-        "Plasecond",  "Plameter",
-        "lambda_p",   "t_p",      "m_p",
-        "E_p",        "k_B",      "dimensionless"
+        "Plaseconds", "Plameters",  "WarpTick",
+        "Plasecond",  "Plameter",   "PlaNewtons",
+        "lambda_p",   "t_p",        "m_p",
+        "E_p",        "k_B",        "dimensionless",
+        "Ricci-Bits", "PlaWatts",   "PlaPascals",
+        "PlaCoulombs","s",          "m",            "J", "kg"
       ]
     },
 
@@ -61,7 +63,9 @@
         {"$ref": "#/$defs/emit_block"},
         {"$ref": "#/$defs/transition_block"},
         {"$ref": "#/$defs/event_block"},
-        {"$ref": "#/$defs/comment_block"}
+        {"$ref": "#/$defs/comment_block"},
+        {"$ref": "#/$defs/physics_quantity_block"},
+        {"$ref": "#/$defs/assignment_block"}
       ]
     },
 
@@ -222,6 +226,34 @@
       "properties": {
         "type": {"const": "COMMENT"},
         "text": {"type": "string"}
+      }
+    },
+
+    "physics_quantity_block": {
+      "type": "object",
+      "required": ["type", "keyword", "name", "expression"],
+      "description": "COMAF × PNMS addendum block (v1.3.22). Covers FORCE, POWER, PRESSURE, CURVATURE, CHARGE, ENTROPY_UNIT, UNCERTAINTY. Ref: TRACEABILITY.md §3.",
+      "properties": {
+        "type":       {"const": "PHYSICS_QUANTITY"},
+        "keyword":    {
+          "type": "string",
+          "enum": ["FORCE", "POWER", "PRESSURE", "CURVATURE", "CHARGE", "ENTROPY_UNIT", "UNCERTAINTY"]
+        },
+        "name":       {"type": "string"},
+        "expression": {"type": "string"},
+        "unit":       {"type": "string"}
+      }
+    },
+
+    "assignment_block": {
+      "type": "object",
+      "required": ["type", "target", "operator", "expression"],
+      "description": "Top-level assignment (parse artifact from field_equation lines in GEOMETRY blocks).",
+      "properties": {
+        "type":       {"const": "ASSIGNMENT"},
+        "target":     {"type": "string"},
+        "operator":   {"type": "string"},
+        "expression": {"type": "string"}
       }
     }
   }

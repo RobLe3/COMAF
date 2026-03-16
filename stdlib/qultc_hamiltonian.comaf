@@ -1,0 +1,39 @@
+# QULT-C Hamiltonian Model
+# Core QULT-C equation (§4 QULT-C Math):
+#   Ĥ_QULT = -ℏ²/2m ∇² + β|ψ|²R - γ ln(S(t))
+# where β < 6×10⁻²⁸ J·m⁵ and γ < 2×10⁻³² J (bounds from §10.2)
+# Paper reference: §4.2 QULT-C Hamiltonian, §10.2 Parameter Bounds
+# Status: syntax demo for Hamiltonian block coverage
+ENTITY: QULTCSystem
+CYCLE: CPL-1
+FRAME: t ∈ [0, 1 WarpTick]
+UNITS: Planck
+
+STATE psi:
+  evolve Schrödinger {
+    init: |ground⟩
+    hamiltonian: -hbar^2 / (2 * m) * nabla^2 + beta * |psi|^2 * R - gamma * ln(S)
+  }
+
+ENTROPY S:
+  evolve Boltzmann {
+    init: 1e120
+    max: 1e121
+    scale: 1e9 Plaseconds
+  }
+
+STABILITY:
+  metric D = exp(-alpha_D * |∇S| * t)
+
+GEOMETRY:
+  field_equation: G_munu + Lambda * g_munu = 8 * pi * G * T_munu
+
+IF D(t) < 0.01:
+  collapse {
+    energy: E_jump
+    resolution: lambda_p
+  }
+
+ON cycle.end:
+  S = S / (1 + alpha)
+  psi = Omega_hat(psi)

@@ -1,0 +1,14 @@
+{
+  "entity": "BouncingUniverse",
+  "cycle": "CPL-n",
+  "units": "Planck",
+  "block_count": 6,
+  "block_types": [
+    "EntropyBlockNode",
+    "StateBlockNode",
+    "GeometryBlockNode",
+    "AssignmentNode",
+    "StabilityBlockNode",
+    "TransitionBlockNode"
+  ]
+}

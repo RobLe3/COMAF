@@ -1,0 +1,30 @@
+# Decoherence Anisotropy Model — cos²θ QULT-C prediction
+# Smoking-gun prediction distinguishing QULT-C from isotropic QBM:
+#   V(t,θ) = V₀ exp(-(Γ₀ + Γ_QULT · cos²θ) · t)
+# where θ = measurement angle, Γ_QULT = α_D · |∇S|
+# Paper reference: §10.3 Falsifiability, deferred Fix 3c (technical review March 2026)
+# Bound: α_D < 3×10⁻⁹ from BEC coherence times
+# Status: syntax demo + anisotropy prediction scaffold
+ENTITY: BECInterferometer
+CYCLE: CPL-1
+FRAME: t ∈ [0, 1 WarpTick]
+UNITS: Planck
+
+ENTROPY V:
+  evolve Boltzmann {
+    init: 1.0
+    max: 1.0
+    scale: 1e12 Plaseconds
+  }
+
+STABILITY:
+  metric D = exp(-(Gamma_0 + Gamma_QULT * cos(theta)^2) * t)
+
+IF D(t) < 0.01:
+  emit {
+    energy: Gamma_QULT
+    decay: 1.0
+  }
+
+ON cycle.end:
+  V = V / (1 + alpha_D)

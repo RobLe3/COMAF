@@ -15,7 +15,7 @@ from .lexer import (Token, tokenize, LexerError,
 from .ast import (ProgramNode, StateBlockNode, EntropyBlockNode,
                   GeometryBlockNode, StabilityBlockNode, CollapseBlockNode,
                   WarpBlockNode, EmitBlockNode, TransitionBlockNode,
-                  AssignmentNode, CommentNode, Node)
+                  AssignmentNode, CommentNode, PhysicsQuantityNode, Node)
 
 
 class ParseError(Exception):
@@ -119,6 +119,11 @@ class Parser:
             blocks=blocks,
         )
 
+    _PHYSICS_QUANTITY_KEYWORDS = frozenset({
+        "FORCE", "POWER", "PRESSURE", "CURVATURE",
+        "CHARGE", "ENTROPY_UNIT", "UNCERTAINTY",
+    })
+
     def parse_block(self) -> Optional[Node]:
         self.skip_newlines()
         tok = self.peek()
@@ -136,6 +141,8 @@ class Parser:
                 return self.parse_conditional_block()
             elif tok.value == "ON":
                 return self.parse_transition_block()
+            elif tok.value in self._PHYSICS_QUANTITY_KEYWORDS:
+                return self.parse_physics_quantity_block()
             else:
                 # Skip unknown keywords gracefully
                 self.advance()
@@ -338,21 +345,25 @@ class Parser:
         event_name = ".".join(event_parts)
         self.expect(TT_COLON)
         statements = []
-        # Collect remaining as statement strings
-        while self.peek().type not in (TT_EOF,) and not self.match(TT_KEYWORD):
+        _TOP = {"ON", "IF", "STATE", "ENTROPY", "GEOMETRY", "STABILITY"}
+        self.skip_newlines()
+        # Collect one statement per line until a top-level keyword or EOF
+        while self.peek().type != TT_EOF:
+            if self.match(TT_KEYWORD) and self.peek().value in _TOP:
+                break
+            if self.peek().type == TT_NEWLINE:
+                self.advance()
+                continue
             stmt_parts = []
-            while self.peek().type not in (TT_EOF,) and not (
-                self.match(TT_KEYWORD, "ON") or self.match(TT_KEYWORD, "IF") or
-                self.match(TT_KEYWORD, "STATE") or self.match(TT_KEYWORD, "ENTROPY")
-            ):
+            while self.peek().type not in (TT_EOF, TT_NEWLINE):
+                if self.match(TT_KEYWORD) and self.peek().value in _TOP:
+                    break
                 if self.peek().type == TT_BRACE_L:
                     break
                 stmt_parts.append(self.advance().value)
-                if not stmt_parts:
-                    break
             if stmt_parts:
                 statements.append(" ".join(stmt_parts))
-            break
+            self.consume_if(TT_NEWLINE)
         return TransitionBlockNode(event_name=event_name, statements=statements)
 
     def parse_assignment(self) -> AssignmentNode:
@@ -360,6 +371,35 @@ class Parser:
         op_tok = self.advance()
         expr = self.collect_line_expr()
         return AssignmentNode(target=target, operator=op_tok.value, expression=expr)
+
+    def parse_physics_quantity_block(self) -> PhysicsQuantityNode:
+        """Parse COMAF × PNMS addendum blocks: FORCE | POWER | PRESSURE |
+        CURVATURE | CHARGE | ENTROPY_UNIT | UNCERTAINTY.
+
+        Syntax:  KEYWORD name: expression [unit]
+        """
+        keyword_tok = self.advance()   # consume FORCE / POWER / etc.
+        keyword = keyword_tok.value
+
+        # name token (IDENT or IDENT-like)
+        name_tok = self.advance()
+        name = name_tok.value
+
+        self.expect(TT_COLON)
+
+        # Collect expression tokens; last token may be a UNIT
+        expr_parts = []
+        unit = ""
+        while self.peek().type not in (TT_EOF, TT_NEWLINE, TT_BRACE_L, TT_BRACE_R):
+            tok = self.advance()
+            if tok.type == TT_UNIT:
+                unit = tok.value
+            else:
+                expr_parts.append(tok.value)
+        self.consume_if(TT_NEWLINE)
+
+        expression = " ".join(expr_parts).strip()
+        return PhysicsQuantityNode(keyword=keyword, name=name, expression=expression, unit=unit)
 
 
 def parse(source: str) -> ProgramNode:

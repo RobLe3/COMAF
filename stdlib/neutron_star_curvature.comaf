@@ -1,0 +1,25 @@
+# Neutron Star Curvature Model
+# COMAF × PNMS Addendum: CURVATURE + ENTROPY blocks
+# Physical scenario: neutron star near nuclear saturation density.
+# Ricci scalar at NS surface ≈ 4.2×10^42 Ricci-Bits (degenerate fermion gas regime).
+# Paper reference: §3 COMAF × PNMS Addendum, §4 QULT-C Math
+# Status: syntax demo + addendum coverage
+ENTITY: NeutronStar
+CYCLE: CPL-3
+FRAME: t ∈ [0, 1 WarpTick]
+UNITS: Planck
+
+ENTROPY S:
+  evolve Boltzmann {
+    init: 1e57
+    max: 1e58
+    scale: 1e10 Plaseconds
+  }
+
+STABILITY:
+  metric D = exp(-|∇S| · t)
+
+CURVATURE R_ns: 4.2e42 RicciBits
+
+ON cycle.end:
+  S = S / (1 + alpha)

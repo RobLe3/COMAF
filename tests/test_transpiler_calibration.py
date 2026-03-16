@@ -13,14 +13,21 @@ VFR references:
   VFR-302: Decoherence-limited expansion
   VFR-303: Entropy-curvature oscillation
   VFR-304: Black hole collapse
+  TC5/TC6: DHO entropy-damping and rendering-threshold (§10 falsifiability)
 """
 import pytest
+from pathlib import Path
 from comaf.ast import (
     ProgramNode, EntropyBlockNode, StateBlockNode, StabilityBlockNode,
     CollapseBlockNode, TransitionBlockNode, GeometryBlockNode
 )
 from comaf.transpilers.mathematica import MathematicaTranspiler
+from comaf.transpilers.python import transpile_python
+from comaf.parser import parse
+from comaf.validator import validate
 from comaf import pnms
+
+STDLIB = Path(__file__).parent.parent / "stdlib"
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -240,3 +247,84 @@ def test_full_bounce_cosmology_structure():
     assert "WhenEvent" in wl, "Cycle transition must use WhenEvent"
     assert "entityName" in wl, "Model metadata must include entity name"
     assert "BouncingUniverse" in wl, "Entity name must appear in output"
+
+
+# ── TC5: DHO Model A — Entropy-Flow Damping ──────────────────────────────────
+
+def test_tc5_dho_entropy_damping_parseable():
+    """TC5: dho_model_a_entropy_damping.comaf must parse without error."""
+    prog = parse((STDLIB / "dho_model_a_entropy_damping.comaf").read_text(encoding="utf-8"))
+    assert prog.entity == "DampedOscillatorEntropyFlow"
+
+
+def test_tc5_entropy_damping_has_entropy_block():
+    """TC5: DHO Model A must contain an ENTROPY block."""
+    prog = parse((STDLIB / "dho_model_a_entropy_damping.comaf").read_text(encoding="utf-8"))
+    entropy_blocks = [b for b in prog.blocks if isinstance(b, EntropyBlockNode)]
+    assert len(entropy_blocks) == 1
+    assert entropy_blocks[0].name == "S"
+
+
+def test_tc5_entropy_damping_python_transpile():
+    """TC5: Python transpilation of DHO Model A must produce solve_ivp scaffold."""
+    prog = parse((STDLIB / "dho_model_a_entropy_damping.comaf").read_text(encoding="utf-8"))
+    py_out = transpile_python(prog)
+    assert "solve_ivp" in py_out
+    assert "entropy_S" in py_out
+
+
+def test_tc5_dho_model_a_parseable_and_valid():
+    """TC5: DHO Model A must parse and pass semantic validation."""
+    prog = parse((STDLIB / "dho_model_a_entropy_damping.comaf").read_text(encoding="utf-8"))
+    is_valid, issues = validate(prog)
+    errors = [i for i in issues if i.severity == "error"]
+    assert len(errors) == 0, f"TC5 has errors: {errors}"
+
+
+def test_tc5_entropy_tau_10s():
+    """TC5: entropy scale tau_A = 10.0 Plaseconds (characteristic ring-down time)."""
+    prog = parse((STDLIB / "dho_model_a_entropy_damping.comaf").read_text(encoding="utf-8"))
+    entropy = next(b for b in prog.blocks if isinstance(b, EntropyBlockNode))
+    assert abs(entropy.scale - 10.0) < 0.01, \
+        f"TC5 entropy scale must be 10.0 Plaseconds (got {entropy.scale})"
+
+
+# ── TC6: DHO Model B — Rendering-Threshold Damping ───────────────────────────
+
+def test_tc6_rendering_damping_parseable():
+    """TC6: dho_model_b_rendering_damping.comaf must parse without error."""
+    prog = parse((STDLIB / "dho_model_b_rendering_damping.comaf").read_text(encoding="utf-8"))
+    assert prog.entity == "DampedOscillatorRenderingThreshold"
+
+
+def test_tc6_rendering_damping_parseable_and_valid():
+    """TC6: DHO Model B must parse and pass semantic validation."""
+    prog = parse((STDLIB / "dho_model_b_rendering_damping.comaf").read_text(encoding="utf-8"))
+    is_valid, issues = validate(prog)
+    errors = [i for i in issues if i.severity == "error"]
+    assert len(errors) == 0, f"TC6 has errors: {errors}"
+
+
+def test_tc6_dho_models_structurally_different():
+    """TC5 and TC6 must have different block structures (falsifiability test)."""
+    prog_a = parse((STDLIB / "dho_model_a_entropy_damping.comaf").read_text(encoding="utf-8"))
+    prog_b = parse((STDLIB / "dho_model_b_rendering_damping.comaf").read_text(encoding="utf-8"))
+    types_a = [type(b).__name__ for b in prog_a.blocks]
+    types_b = [type(b).__name__ for b in prog_b.blocks]
+    # Model B has a CollapseBlockNode (rendering threshold trigger); Model A does not
+    assert "CollapseBlockNode" not in types_a, "TC5 (entropy) should NOT have a collapse block"
+    assert "CollapseBlockNode" in types_b, "TC6 (rendering) MUST have a collapse block"
+
+
+def test_tc6_dmin_collapse_threshold():
+    """TC6: IF D(t) < 0.95 collapse trigger encodes the D_min = 0.95 parameter."""
+    prog = parse((STDLIB / "dho_model_b_rendering_damping.comaf").read_text(encoding="utf-8"))
+    collapse = next(b for b in prog.blocks if isinstance(b, CollapseBlockNode))
+    assert "0.95" in collapse.condition, \
+        f"TC6 collapse condition must contain D_min=0.95 (got: {collapse.condition!r})"
+
+
+def test_tc6_wolfram_file_exists():
+    """TC6: Wolfram verification file must be present."""
+    tc6_path = Path(__file__).parent / "wolfram" / "tc6_dho_rendering_damping.wl"
+    assert tc6_path.exists(), f"TC6 Wolfram file not found: {tc6_path}"

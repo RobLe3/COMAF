@@ -1,0 +1,13 @@
+{
+  "entity": "EarlyUniverse",
+  "cycle": "CPL-1",
+  "units": "Planck",
+  "block_count": 5,
+  "block_types": [
+    "EntropyBlockNode",
+    "StateBlockNode",
+    "GeometryBlockNode",
+    "AssignmentNode",
+    "WarpBlockNode"
+  ]
+}

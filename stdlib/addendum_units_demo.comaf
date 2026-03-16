@@ -1,0 +1,42 @@
+# COMAF × PNMS Addendum Units Demo
+# Demonstrates all 7 addendum block types (FORCE, POWER, PRESSURE,
+# CURVATURE, CHARGE, ENTROPY_UNIT, UNCERTAINTY) from co_af_p3z.md.
+# Paper reference: §3 COMAF × PNMS Addendum
+# Status: syntax demo (not numerically verified)
+ENTITY: AddendumDemo
+CYCLE: CPL-1
+FRAME: t ∈ [0, 1 WarpTick]
+UNITS: Planck
+
+ENTROPY S:
+  evolve Boltzmann {
+    init: 1e120
+    max: 1e121
+    scale: 1e9 Plaseconds
+  }
+
+STABILITY:
+  metric D = exp(-|∇S| · t)
+
+FORCE F_grav: beta * |psi|^2 * R PlaNewtons
+
+POWER P_emit: hbar * c^6 / (M * M) PlaWatts
+
+PRESSURE P_vac: hbar * c / (6 * pi^2) PlaPascals
+
+CURVATURE R_ns: 4.2e42 RicciBits
+
+CHARGE q_eff: alpha * e_p
+
+ENTROPY_UNIT S_tick: k_B
+
+UNCERTAINTY delta_E: hbar / (2 * delta_t)
+
+IF D(t) < 0.01:
+  collapse {
+    energy: E_jump
+    resolution: lambda_p
+  }
+
+ON cycle.end:
+  S = S / (1 + alpha)
