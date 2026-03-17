@@ -12,7 +12,7 @@ This repository contains the reference Python implementation of the COMAF-Lite i
 **Paper:** QULT-C: A Layered Computational Ontology for Quantum Cosmology (v1.337lulz, March 2026) — arXiv submission in preparation
 
 [![Version](https://img.shields.io/badge/version-1.337.0-blue)]()
-[![Tests](https://img.shields.io/badge/tests-289%20passed-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-326%20passed-brightgreen)]()
 [![arXiv](https://img.shields.io/badge/arXiv-coming%20soon-lightgrey)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
