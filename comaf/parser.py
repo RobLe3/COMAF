@@ -406,7 +406,19 @@ class Parser:
 
 
 def parse(source: str) -> ProgramNode:
-    """Parse COMAF-Lite source text into a ProgramNode AST."""
+    """Parse COMAF-Lite source text into a ProgramNode AST.
+
+    Parameters
+    ----------
+    source : str
+        Raw COMAF-Lite source code.  Must be a string — passing a token
+        list (e.g. the output of ``tokenize()``) raises TypeError.
+    """
+    if not isinstance(source, str):
+        raise TypeError(
+            f"parse() expects a str, got {type(source).__name__!r}. "
+            "Pass raw COMAF-Lite source text, not a token list."
+        )
     tokens = tokenize(source)
     parser = Parser(tokens)
     return parser.parse()
